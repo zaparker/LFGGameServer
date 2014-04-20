@@ -132,7 +132,9 @@
     <Compile Include="SampleActions.cs" />
     <Compile Include="SampleGameInfo.cs" />
     <Compile Include="SampleGameInstance.cs" />
+    <Compile Include="SampleGameInstanceGenerator.cs" />
     <Compile Include="SampleHub.cs" />
+    <Compile Include="SampleLobbyMessageSender.cs" />
     <Compile Include="SamplePlayerInfo.cs" />
     <Compile Include="SignalRMessageSender.cs" />
   </ItemGroup>

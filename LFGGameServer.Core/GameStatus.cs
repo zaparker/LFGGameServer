@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace LFGGameServer.Core
 {
-    public static class MessageGroups
+    public enum GameStatus
     {
-        public const string All = "all";
-        public const string Lobby = "lobby";
+        Ready,
+        Running,
+        Stopped
     }
 }

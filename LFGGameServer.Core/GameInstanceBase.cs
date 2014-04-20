@@ -19,14 +19,19 @@ namespace LFGGameServer.Core
             this.gameInfo = gameInfo;
             this.messageSender = messageSender;
             this.players = new List<TPlayer>();
+            this.Status = GameStatus.Ready;
         }
 
         public TGame GameInfo { get { return gameInfo; } }
-
-        public virtual void OnStart() { }
-        public virtual void OnTick(double elapsedTime) { }
+        public GameStatus Status { get; set; }
+        public virtual void OnStart() {
+            this.Status = GameStatus.Running;
+        }
+        public virtual void OnTick(double elapsedTime) { 
+        }
         public virtual void OnStop()
         {
+            this.Status = GameStatus.Stopped;
             foreach (var p in players)
                 messageSender.SendGameEndMessage(p, gameInfo);
         }

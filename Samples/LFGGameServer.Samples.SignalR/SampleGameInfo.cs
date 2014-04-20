@@ -6,8 +6,8 @@ namespace LFGGameServer.Samples.SignalR
     {
         public string Name { get; set; }
 
-        public SampleGameInfo(string id, string name)
-            : base(id)
+        public SampleGameInfo(string id, int maxPlayers, string name)
+            : base(id, maxPlayers)
         {
             this.Name = name;
         }

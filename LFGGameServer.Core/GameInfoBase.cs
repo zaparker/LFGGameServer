@@ -9,10 +9,13 @@ namespace LFGGameServer.Core
     public class GameInfoBase
     {
         private string id;
-        public GameInfoBase(string id)
+        private int maxPlayers;
+        public GameInfoBase(string id, int maxPlayers)
         {
             this.id = id;
+            this.maxPlayers = maxPlayers;
         }
         public string Id { get { return id; } }
+        public int MaxPlayers { get { return maxPlayers; } }
     }
 }

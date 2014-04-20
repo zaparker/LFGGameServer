@@ -9,59 +9,49 @@ namespace LFGGameServer.Samples.SignalR
 {
     public class SampleHub : Hub
     {
-        private static List<SampleGameInstance> gameInstances = new List<SampleGameInstance>();
-        private static SignalRMessageSender messageSender = new SignalRMessageSender();
-
+        private static ServerInstanceBase<SamplePlayerInfo, SampleGameInfo> gameServer = new ServerInstanceBase<SamplePlayerInfo, SampleGameInfo>(new SampleGameInstanceGenerator(), new SampleLobbyMessageSender());
+       
         public IEnumerable<SampleGameInfo> GetLobby()
         {
-            return gameInstances.Select(g => g.GameInfo);
+            return gameServer.GetAllGameInfo();
         }
 
-        public string CreateGame(string gameName)
+        public void JoinServer(string name)
         {
-            var gameInfo = new SampleGameInfo(Guid.NewGuid().ToString(), gameName);
-            var gameInstance = new SampleGameInstance(gameInfo, messageSender);
-            gameInstances.Add(gameInstance);
-            gameInstance.OnStart();
-            Clients.All.addGameToLobby(gameInfo);
-            return gameInstance.GameInfo.Id;
+            var playerInfo = new SamplePlayerInfo(Context.ConnectionId, name);
+            gameServer.AddPlayer(playerInfo);
+            Groups.Add(Context.ConnectionId, MessageGroups.Lobby);
+        }
+
+        public string CreateGame(string gameName, int maxPlayers)
+        {
+            var gameInfo = new SampleGameInfo(Guid.NewGuid().ToString(), maxPlayers, gameName);
+            gameServer.CreateGame(gameInfo);
+            return gameInfo.Id;
         }
 
         public void EndGame(string gameId)
         {
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
-            if (gameInstance != null)
-            {
-                gameInstance.OnStop();
-                gameInstances.Remove(gameInstance);
-                Clients.All.removeGameFromLobby(gameInstance.GameInfo);
-            }
+            gameServer.EndGame(gameId);
         }
 
         public void JoinGame(string gameId, string playerName)
         {
-           var playerInfo = new SamplePlayerInfo(Context.ConnectionId, playerName);
-           var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
-           if (gameInstance != null)
-           {
-               Groups.Add(Context.ConnectionId, gameInstance.GameInfo.Id);
-               gameInstance.AddPlayer(playerInfo);
-           }
+            gameServer.JoinGame(Context.ConnectionId, gameId);
+            Groups.Add(Context.ConnectionId, gameId);
+            Groups.Remove(Context.ConnectionId, MessageGroups.Lobby);
         }
 
         public void LeaveGame(string gameId)
         {
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
-            if (gameInstance != null)
-            {
-                Groups.Remove(Context.ConnectionId, gameInstance.GameInfo.Id);
-                gameInstance.RemovePlayer(Context.ConnectionId);
-            }
+            gameServer.LeaveGame(Context.ConnectionId, gameId);
+            Groups.Remove(Context.ConnectionId, gameId);
+            Groups.Add(Context.ConnectionId, MessageGroups.Lobby);
         }
 
         public SampleGameInfo GetGameInfo(string gameId)
         {
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
+            var gameInstance = gameServer.GetGame(gameId);
             if(gameInstance != null) 
                 return gameInstance.GameInfo;
             else 
@@ -70,27 +60,21 @@ namespace LFGGameServer.Samples.SignalR
 
         public IEnumerable<SamplePlayerInfo> GetGamePlayers(string gameId)
         {
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
+            var gameInstance = gameServer.GetGame(gameId);
             if (gameInstance != null)
                 return gameInstance.GetPlayersInMessageGroup(MessageGroups.All);
             else
                 return null;
         }
 
-        public SamplePlayerInfo GetPlayerInfo(string gameId, string playerId)
+        public SamplePlayerInfo GetPlayerInfo(string playerId)
         {
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
-            if (gameInstance != null)
-            {
-                return gameInstance.GetPlayer(playerId);
-            }
-            else
-                return null;
+            return gameServer.GetPlayer(playerId);
         }
 
         public void Poke(string gameId, string playerId)
-        { 
-            var gameInstance = gameInstances.FirstOrDefault(g => g.GameInfo.Id == gameId);
+        {
+            var gameInstance = gameServer.GetGame(gameId) as SampleGameInstance;
             if (gameInstance != null)
             {
                 gameInstance.Poke(Context.ConnectionId, playerId);

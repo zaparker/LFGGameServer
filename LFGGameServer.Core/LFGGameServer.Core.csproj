@@ -41,10 +41,14 @@
   <ItemGroup>
     <Compile Include="GameInfoBase.cs" />
     <Compile Include="GameInstanceBase.cs" />
+    <Compile Include="GameStatus.cs" />
+    <Compile Include="IGameInstanceGenerator.cs" />
+    <Compile Include="ILobbyMessageSender.cs" />
     <Compile Include="IMessageSender.cs" />
     <Compile Include="MessageGroups.cs" />
     <Compile Include="PlayerInfoBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerInstanceBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -10,7 +10,12 @@ namespace LFGGameServer.Samples.SignalR
     public class SampleHub : Hub
     {
         private static ServerInstanceBase<SamplePlayerInfo, SampleGameInfo> gameServer = new ServerInstanceBase<SamplePlayerInfo, SampleGameInfo>(new SampleGameInstanceGenerator(), new SampleLobbyMessageSender());
-       
+
+        public SampleHub()
+        {
+            gameServer.Start();
+        }
+
         public IEnumerable<SampleGameInfo> GetLobby()
         {
             return gameServer.GetAllGameInfo();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LFGGameServer.Core
@@ -10,6 +11,9 @@ namespace LFGGameServer.Core
         where TPlayer : PlayerInfoBase
         where TGame : GameInfoBase
     {
+        private bool running = false;
+        private object runningLock = new object();
+        private Thread runningThread;
         private List<GameInstanceBase<TPlayer, TGame>> gameInstances = new List<GameInstanceBase<TPlayer, TGame>>();
         private List<TPlayer> players = new List<TPlayer>();
         private IGameInstanceGenerator<TPlayer, TGame> gameInstanceGenerator;
@@ -71,10 +75,43 @@ namespace LFGGameServer.Core
             }
         }
 
-        public void OnTick(double elapsedTime)
+        public void Start()
         {
-            foreach (var instance in gameInstances)
-                instance.OnTick(elapsedTime);
+            lock (runningLock)
+            {
+                if (!running)
+                {
+                    runningThread = new Thread(Tick);
+                    runningThread.Start(); 
+                }
+                running = true;
+            }
+        }
+
+        public void Tick()
+        {
+            var elapsedTime = 1000.0 / 15.0;
+            var shouldAbort = false;
+            while (!shouldAbort)
+            {
+                var start = DateTime.Now;
+                lock (runningLock)
+                {
+                    shouldAbort = !running;
+                }
+                foreach (var instance in gameInstances)
+                    instance.OnTick(elapsedTime);
+                var elapsed = (DateTime.Now - start).TotalMilliseconds;
+                Thread.Sleep((int)(elapsedTime - elapsed));
+            }
+        }
+
+        public void End()
+        {
+            lock (runningLock)
+            {
+                running = false;
+            }
         }
 
         public TPlayer GetPlayer(string playerId)

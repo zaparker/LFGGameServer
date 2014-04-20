@@ -16,5 +16,10 @@ namespace LFGGameServer.Samples.SignalR
         {
             SendActionMessage(MessageGroups.All, SampleActions.Poke, new PokeActionParameters { Poker = GetPlayer(poker), Pokee = GetPlayer(pokee) });
         }
+
+        public override void OnTick(double elapsedTime)
+        {
+            SendActionMessage(MessageGroups.All, SampleActions.Tick, null);
+        }
     }
 }

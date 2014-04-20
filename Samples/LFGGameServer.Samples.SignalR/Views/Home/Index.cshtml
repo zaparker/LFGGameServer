@@ -18,6 +18,7 @@
     <div data-bind="if: inServer">
         <div data-bind="if: inGame">
             <h3>Current PLayers:</h3>
+            <label>Ticks:</label><span data-bind="text: ticks"></span>
             <ul data-bind="foreach: players">
                 <li><span data-bind="text: Name"></span>
                     <button type="button" data-bind="click: $parent.pokePlayer">Poke</button></li>
@@ -61,6 +62,7 @@
             self.gameId = ko.observable('');
             self.players = ko.observableArray([]);
             self.lobby = ko.observableArray([]);
+            self.ticks = ko.observable(0);
             self.createGame = function () {
                 var gameName = self.newGameName();
                 var maxPlayers = self.newGameMaxPlayers();
@@ -125,6 +127,7 @@
                 });
             };
             self.init = function () {
+                
             };
             self.gameInfo = function (playerInfo) { /* TODO: Show updating game info */ };
             self.playerInfo = function (playerInfo) { /* TODO: Show updating player info */ };
@@ -134,6 +137,12 @@
             self.onPoke = function (params) {
                 self.logs.unshift(params.Poker.Name + ' poked ' + params.Pokee.Name);
             };
+            self.innerTicks = 0;
+            self.onTick = function () {
+                self.innerTicks++;
+                if (self.innerTicks % 30 == 0)
+                    self.ticks(self.innerTicks);
+            };
             sampleHub.client.playerJoined = self.playerJoined;
             sampleHub.client.playerleft = self.playerleft;
             sampleHub.client.gameEnd = self.gameEnd;
@@ -142,6 +151,7 @@
             sampleHub.client.addGameToLobby = self.addGameToLobby;
             sampleHub.client.removeGameFromLobby = self.removeGameFromLobby;
             sampleHub.client.onPoke = self.onPoke;
+            sampleHub.client.tick = self.onTick;
         }
         $(document).ready(function () {
             var sampleHub = $.connection.sampleHub;

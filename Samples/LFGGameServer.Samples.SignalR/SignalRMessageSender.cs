@@ -40,7 +40,9 @@ namespace LFGGameServer.Samples.SignalR
                 case SampleActions.Poke:
                     HandlePokeAction(group, parameters as PokeActionParameters);
                     break;
-                
+                case SampleActions.Tick:
+                    group.tick();
+                    break;
             }
         }
 

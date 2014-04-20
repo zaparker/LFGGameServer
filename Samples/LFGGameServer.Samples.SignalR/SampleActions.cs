@@ -7,6 +7,7 @@ namespace LFGGameServer.Samples.SignalR
 {
     public static class SampleActions
     {
-        public const string Poke = "poke";
+        public const string Poke = "poke"; 
+        public const string Tick = "tick";
     }
 }
